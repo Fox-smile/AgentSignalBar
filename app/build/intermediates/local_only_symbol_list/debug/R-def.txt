@@ -1,0 +1,31 @@
+R_DEF: Internal format may change without notice
+local
+drawable ic_launcher_background
+drawable ic_signal_gray
+drawable ic_signal_green
+drawable ic_signal_red
+drawable ic_signal_yellow
+mipmap ic_launcher
+string active_agents
+string app_name
+string channel_description
+string channel_name
+string connection_fail
+string connection_ok
+string current_status
+string enable_notification
+string enable_overlay
+string last_updated
+string overlay_permission_required
+string server_ip_label
+string server_port_label
+string settings_title
+string start_service
+string status_busy
+string status_disconnected
+string status_idle
+string status_paused
+string status_stuck
+string stop_service
+string test_connection
+style Theme.AgentSignalBar
