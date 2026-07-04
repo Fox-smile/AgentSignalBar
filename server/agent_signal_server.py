@@ -25,14 +25,21 @@ from pathlib import Path
 # ── 配置 ──────────────────────────────────────────────
 
 DEFAULT_PORT = 9120
+
+# 根据系统自动选择默认状态文件目录
+_default_state_dir = os.environ.get(
+    "AGENT_SIGNAL_LIGHT_STATE_DIR",
+    os.environ.get("SIGNAL_LIGHT_STATE_DIR", None)
+)
+if _default_state_dir is None:
+    if os.name == "nt":  # Windows
+        _default_state_dir = os.path.join(os.environ.get("USERPROFILE", "C:\\"), ".agent-signal")
+    else:
+        _default_state_dir = "/tmp/agent-signal"
+
 STATE_FILE = os.environ.get(
     "AGENT_SIGNAL_LIGHT_STATE_FILE",
-    os.path.join(
-        os.environ.get("AGENT_SIGNAL_LIGHT_STATE_DIR",
-                       os.environ.get("SIGNAL_LIGHT_STATE_DIR",
-                                      "/tmp/agent-signal")),
-        "status.json"
-    )
+    os.path.join(_default_state_dir, "status.json")
 )
 
 # ── HTML 模板 ─────────────────────────────────────────
@@ -190,7 +197,7 @@ class SignalHandler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
 
         # ── /api/status ──
-        if path == "/api/status":
+        if path in ("/api/status", "/status.json"):
             doc = read_status()
             if doc is None:
                 # 文件不存在，返回默认空闲状态
