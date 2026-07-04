@@ -151,13 +151,15 @@ def get_hook_config(agent_type, hook_script_path):
             "command": hook_script_path
         }]
     elif agent_type == "codebuddy":
+        # CodeBuddy 桌面端格式（官方文档要求带 "hooks" 嵌套层）
+        _cmd = {"type": "command", "command": hook_script_path}
         return {
-            "SessionStart":       [{"matcher": "", "command": hook_script_path}],
-            "PreToolUse":         [{"matcher": "*", "command": hook_script_path}],
-            "PostToolUse":        [{"matcher": "*", "command": hook_script_path}],
-            "PostToolUseFailure": [{"matcher": "*", "command": hook_script_path}],
-            "Stop":               [{"matcher": "", "command": hook_script_path}],
-            "SubagentStop":       [{"matcher": "", "command": hook_script_path}],
+            "SessionStart":       [{"matcher": "",  "hooks": [_cmd]}],
+            "PreToolUse":         [{"matcher": "*",  "hooks": [_cmd]}],
+            "PostToolUse":        [{"matcher": "*",  "hooks": [_cmd]}],
+            "PostToolUseFailure": [{"matcher": "*",  "hooks": [_cmd]}],
+            "Stop":               [{"matcher": "",  "hooks": [_cmd]}],
+            "SubagentStop":       [{"matcher": "",  "hooks": [_cmd]}],
         }
     elif agent_type == "workbuddy":
         return {"hooks": {"agent_signal": {"command": hook_script_path}}}
@@ -208,10 +210,25 @@ def apply_hook_config(settings_file, agent_type, hook_script_path, is_windows):
             existing["hooks"] = existing_hooks
         else:
             # Claude Code / CodeBuddy: hooks 在顶层
+            # 新格式：每个 event 的值 = [{"matcher":..., "hooks": [{"type":"command","command":...}]}]
             existing_hooks = existing.get("hooks", {})
             for event, handlers in new_hooks.items():
                 e = existing_hooks.get(event, [])
-                if not any("agent-signal" in str(h.get("command", "")) for h in e):
+                # 检查是否已有 agent-signal 相关的 hook（兼容新旧两种格式）
+                already = False
+                for h in e:
+                    cmd = ""
+                    if isinstance(h, dict):
+                        # 新格式：command 在 h["hooks"][0]["command"]
+                        nested = h.get("hooks", [])
+                        if nested and isinstance(nested[0], dict):
+                            cmd = nested[0].get("command", "")
+                        else:
+                            cmd = h.get("command", "")
+                    if "agent-signal" in str(cmd):
+                        already = True
+                        break
+                if not already:
                     e.extend(handlers)
                 existing_hooks[event] = e
             existing["hooks"] = existing_hooks

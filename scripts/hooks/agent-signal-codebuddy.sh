@@ -23,6 +23,11 @@
 
 set -euo pipefail
 
+# Windows Git Bash 里 python3 可能不存在，用 python 代替
+if ! command -v python3 &>/dev/null; then
+    alias python3=python
+fi
+
 AGENT_NAME="${AGENT_SIGNAL_AGENT_NAME:-codebuddy}"
 SIGNAL_CLI="${AGENT_SIGNAL_CLI:-agent-signal}"
 STATE_DIR="${AGENT_SIGNAL_LIGHT_STATE_DIR:-${SIGNAL_LIGHT_STATE_DIR:-/tmp/agent-signal}}"
