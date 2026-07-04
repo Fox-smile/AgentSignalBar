@@ -381,26 +381,28 @@ def main():
     print(f"{Colors.BOLD}[1/5]{Colors.NC} 安装适配脚本...")
     HOOKS_DIR.mkdir(parents=True, exist_ok=True)
 
-    hook_scripts = {
-        "claude-code": "agent-signal-claude.sh",
-        "codex": "agent-signal-codex.sh",
-        "trae": "agent-signal-trae.sh",
-        "codebuddy": "agent-signal-codebuddy.sh",
-        "workbuddy": "agent-signal-workbuddy.sh",
-    }
-
-    for name, filename in hook_scripts.items():
-        src = SCRIPT_DIR / "scripts" / "hooks" / filename
-        dst = HOOKS_DIR / filename
-        if src.exists():
-            shutil.copy2(src, dst)
-            if not IS_WINDOWS:
-                dst.chmod(0o755)
-
-    server_src = SCRIPT_DIR / "server" / "agent_signal_server.py"
-    server_dst = INSTALL_DIR / "agent_signal_server.py"
-    shutil.copy2(server_src, server_dst)
+    # 复制整个 hooks/ 目录（包含所有 .sh 和 .py 脚本）
+    src_hooks_dir = SCRIPT_DIR / "scripts" / "hooks"
+    if src_hooks_dir.exists():
+        for hook_file in src_hooks_dir.iterdir():
+            if hook_file.is_file():
+                dst = HOOKS_DIR / hook_file.name
+                shutil.copy2(hook_file, dst)
+                if not IS_WINDOWS:
+                    dst.chmod(0o755)
     ok(f"脚本已安装到 {HOOKS_DIR}")
+
+    # Hook 脚本名映射（用于写入 settings.json）
+    # Windows 上 CodeBuddy Hook 使用 .py（需要 python.exe 执行）
+    # macOS/Linux 上使用 .sh（需要 bash）
+    _ext = ".py" if IS_WINDOWS else ".sh"
+    hook_scripts = {
+        "claude-code": f"agent-signal-claude{_ext}",
+        "codex": f"agent-signal-codex{_ext}",
+        "trae": f"agent-signal-trae{_ext}",
+        "codebuddy": f"agent-signal-codebuddy{_ext}",
+        "workbuddy": f"agent-signal-workbuddy{_ext}",
+    }
 
     # ── Step 2: 检测 Agent ──
     print(f"\n{Colors.BOLD}[2/5]{Colors.NC} 检测 Agent...")

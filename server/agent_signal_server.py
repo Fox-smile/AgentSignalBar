@@ -82,15 +82,15 @@ STATUS_PAGE_HTML = """<!DOCTYPE html>
 </head>
 <body>
     <div class="card">
-        <div class="dot {{css_class}}"></div>
-        <h1>{{display_name}}</h1>
-        <p class="subtitle">{{summary}}</p>
+        <div class="dot {css_class}"></div>
+        <h1>{display_name}</h1>
+        <p class="subtitle">{summary}</p>
         <div class="info">
             <div class="label">状态文件</div>
-            <div class="value">{{state_file}}</div>
+            <div class="value">{state_file}</div>
             <div class="label">最后更新</div>
-            <div class="value">{{updated_at}}</div>
-            <div class="sessions">{{sessions_html}}</div>
+            <div class="value">{updated_at}</div>
+            <div class="sessions">{sessions_html}</div>
         </div>
     </div>
     <script>setTimeout(() => location.reload(), 3000);</script>
